@@ -174,6 +174,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
+    Android: com.DefaultCompany.REEBEquiment
     Standalone: com.BeardedNinjaGames.VRInteractionFramework
   buildNumber:
     Standalone: 0
