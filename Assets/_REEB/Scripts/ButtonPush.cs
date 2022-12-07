@@ -5,12 +5,14 @@ using UnityEngine;
 public class ButtonPush : MonoBehaviour
 {
     public bool ButtonPushed = false;
+    public AudioSource ButtonClick;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("IndexFinger"))
         {
             ButtonPushed = true;
+            ButtonClick.Play();
         }
     }
     private void OnTriggerStay(Collider other)
