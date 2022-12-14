@@ -56,146 +56,156 @@ public class LinacController : MonoBehaviour
     [SerializeField]
     List<ButtonPush> ButtonList;
 
+    [SerializeField]
+    AudioSource ButtonClick;
+
 
     bool StartLinac = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        BPUP = ButtonUp.GetComponent<ButtonPush>();
+        //BPUP = ButtonUp.GetComponent<ButtonPush>();
 
-        BPDOWN = ButtonDown.GetComponent<ButtonPush>();
-        BPStart = ButtonStart.GetComponent<ButtonPush>();
-        BPFineDOWN = ButtonFineDown.GetComponent<ButtonPush>();
-        BPFineUp = ButtonFineUp.GetComponent<ButtonPush>();
-        BPMoveBedForward = ButtonMoveBedForward.GetComponent<ButtonPush>();
-        BPMoveBedBack = ButtonMoveBedBack.GetComponent<ButtonPush>();
-        BPSideLaser = ButtonSideLaser.GetComponent<ButtonPush>();
-        BPPerpedicularLaser = ButtonPerpedicularLaser.GetComponent<ButtonPush>();
-        ButtonList.Add(BPUP);
-        ButtonList.Add(BPDOWN);
-        ButtonList.Add(BPMoveBedForward);
-        ButtonList.Add(BPMoveBedBack);
-        ButtonList.Add(BPFineUp);
-        ButtonList.Add(BPFineDOWN);
+        //BPDOWN = ButtonDown.GetComponent<ButtonPush>();
+        //BPStart = ButtonStart.GetComponent<ButtonPush>();
+        //BPFineDOWN = ButtonFineDown.GetComponent<ButtonPush>();
+        //BPFineUp = ButtonFineUp.GetComponent<ButtonPush>();
+        //BPMoveBedForward = ButtonMoveBedForward.GetComponent<ButtonPush>();
+        //BPMoveBedBack = ButtonMoveBedBack.GetComponent<ButtonPush>();
+        //BPSideLaser = ButtonSideLaser.GetComponent<ButtonPush>();
+        //BPPerpedicularLaser = ButtonPerpedicularLaser.GetComponent<ButtonPush>();
+        //ButtonList.Add(BPUP);
+        //ButtonList.Add(BPDOWN);
+        //ButtonList.Add(BPMoveBedForward);
+        //ButtonList.Add(BPMoveBedBack);
+        //ButtonList.Add(BPFineUp);
+        //ButtonList.Add(BPFineDOWN);
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        AudioToggleOff();
-        BaseLift();
+        //AudioToggleOff();
+        ////BaseLift();
         AparatusMovement();
-        FineLiftMovement();
-        BedMovement();
-        LaserToggle();
+        //FineLiftMovement();
+        //BedMovement();
+        //LaserToggle();
 
     }
 
-    void BaseLift()
+    public void BaseLiftUp()
     {
-        if (BPUP.ButtonPushed)
-        {
+        //if (BPUP.ButtonPushed)
+        //{
             if (BedBase.transform.localScale.y <= 2f)
             {
                 BedBase.transform.localScale = new Vector3(BedBase.transform.localScale.x, BedBase.transform.localScale.y + .001f, BedBase.transform.localScale.z);
                 AudioToggleON();
             }
-        }
-
-        if (BPDOWN.ButtonPushed)
-        {
-            if (BedBase.transform.localScale.y >= 1f)
-            {
-                BedBase.transform.localScale = new Vector3(BedBase.transform.localScale.x, BedBase.transform.localScale.y - .001f, BedBase.transform.localScale.z);
-                AudioToggleON();
-            }
-        }
-
+        //}
     }
-    void AparatusMovement()
+    public void BaseLiftDown()
     {
-        if (BPStart.ButtonPushed && !StartLinac)
+        if (BedBase.transform.localScale.y >= 1f)
         {
-            StartLinac = true;
+            BedBase.transform.localScale = new Vector3(BedBase.transform.localScale.x, BedBase.transform.localScale.y - .001f, BedBase.transform.localScale.z);
+            AudioToggleON();
         }
+    }
+    public void AparatusMovement()
+    {
         if (StartLinac)
         {
             LinacAparatusMovement.transform.Rotate(new Vector3(1f, 0f, 0f) * LinacTurnSpeed * Time.deltaTime);
         }
     }
-    void FineLiftMovement()
+    public void StartLinacMachine()
     {
-        if (BPFineUp.ButtonPushed)
+        if (!StartLinac)
         {
-
+            StartLinac = true;
+        }
+    }
+    public void FineLiftMovementUp()
+    {
+        //if (BPFineUp.ButtonPushed)
+        //{
             if (FineLift.transform.localScale.z <= 2f)
             {
                 FineLift.transform.localScale = new Vector3(FineLift.transform.localScale.x, FineLift.transform.localScale.y, FineLift.transform.localScale.z + .001f);
                 AudioToggleON();
             }
-        }
+        //}
 
-        if (BPFineDOWN.ButtonPushed)
-        {
+        //if (BPFineDOWN.ButtonPushed)
+        //{
 
-            if (FineLift.transform.localScale.z >= 1f)
-            {
-                FineLift.transform.localScale = new Vector3(FineLift.transform.localScale.x, FineLift.transform.localScale.y, FineLift.transform.localScale.z - .001f);
-                AudioToggleON();
-            }
-        }
+        //}
 
     }
-    void BedMovement()
+    public void FineLiftMovementDown()
     {
-        if (BPMoveBedForward.ButtonPushed)
+        if (FineLift.transform.localScale.z >= 1f)
         {
+            FineLift.transform.localScale = new Vector3(FineLift.transform.localScale.x, FineLift.transform.localScale.y, FineLift.transform.localScale.z - .001f);
+            AudioToggleON();
+        }
+    }
+    public void BedMovementForward()
+    {
+        //if (BPMoveBedForward.ButtonPushed)
+        //{
             if (Bed.transform.localPosition.y <= 1130f)
             {
                 Bed.transform.localPosition = new Vector3(Bed.transform.localPosition.x, Bed.transform.localPosition.y + .1f, Bed.transform.localPosition.z);
                 AudioToggleON();
             }
-        }
-        if (BPMoveBedBack.ButtonPushed)
-        {
+        //}
+
+    }
+    public void BedMovementBack()
+    {
+        //if (BPMoveBedBack.ButtonPushed)
+        //{
             if (Bed.transform.localPosition.y >= 708f)
             {
                 Bed.transform.localPosition = new Vector3(Bed.transform.localPosition.x, Bed.transform.localPosition.y - .1f, Bed.transform.localPosition.z);
                 AudioToggleON();
             }
-        }
+        //}
     }
     void AudioToggleON()
     {
-        if (ButtonList.Any(x => x.ButtonPushed))
-        {
-            Debug.Log("AnyButton Presed");
+        //if (ButtonList.Any(x => x.ButtonPushed))
+        //{
+        //    Debug.Log("AnyButton Presed");
             if (!MotorNoise.isPlaying)
             {
                 MotorNoise.Play();
             }
-        }
+        //}
     }
-    void AudioToggleOff()
+    public void AudioToggleOff()
     {
-        if(ButtonList.All(x => !x.ButtonPushed))
-        {
+        //if(ButtonList.All(x => !x.ButtonPushed))
+        //{
             MotorNoise.Stop();
-        }
+        //}
     }
-    void LaserToggle()
+    public void SideLaserToggle()
     {
-        if (!BPSideLaser.ButtonPushed)
-        {
-            SideLaserReset = false;
-        }
-        if (BPSideLaser.ButtonPushed)
-        {
-            if (!SideLaserReset)
-            {
-                SideLaserReset = true;
+        //if (!BPSideLaser.ButtonPushed)
+        //{
+        //    SideLaserReset = false;
+        //}
+        //if (BPSideLaser.ButtonPushed)
+        //{
+        //    if (!SideLaserReset)
+        //    {
+        //        SideLaserReset = true;
                 if (SideLaserActive)
                 {
                     SideLaser.SetActive(false);
@@ -206,17 +216,21 @@ public class LinacController : MonoBehaviour
                     SideLaser.SetActive(true);
                     SideLaserActive = true;
                 }
-            }
-        }
-        if (!BPPerpedicularLaser.ButtonPushed)
-        {
-            PerpedicualLaserReset = false;
-        }
-        if (BPPerpedicularLaser.ButtonPushed)
-        {
-            if (!PerpedicualLaserReset)
-            {
-                PerpedicualLaserReset = true;
+        //    }
+        //}
+
+    }
+    public void PerpedicularLaserToggle()
+    {
+        //if (!BPPerpedicularLaser.ButtonPushed)
+        //{
+        //    PerpedicualLaserReset = false;
+        //}
+        //if (BPPerpedicularLaser.ButtonPushed)
+        //{
+        //    if (!PerpedicualLaserReset)
+        //    {
+        //        PerpedicualLaserReset = true;
                 if (PerpedicualLaserActive)
                 {
                     PerpedicualrLaser.SetActive(false);
@@ -227,8 +241,12 @@ public class LinacController : MonoBehaviour
                     PerpedicualrLaser.SetActive(true);
                     PerpedicualLaserActive = true;
                 }
-            }
+        //    }
 
-        }
+        //}
+    }
+    public void ButtonClickSound()
+    {
+        ButtonClick.Play();
     }
 }
