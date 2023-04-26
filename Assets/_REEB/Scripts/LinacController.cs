@@ -50,6 +50,8 @@ public class LinacController : MonoBehaviour
     GameObject SensorControls;
     [SerializeField]
     GameObject BedControls;
+    [SerializeField]
+    Button ToggleControlsBtn;
     //Scanners
     [SerializeField]
     GameObject SmallScanner;
@@ -66,8 +68,31 @@ public class LinacController : MonoBehaviour
     TMP_Text SelectedScannerText;
     int SensorID = 0;
 
+    //Validation
+    [SerializeField]
+    float PositionTreshold = .1f;
+    [SerializeField]
+    float TreatmentRotThreshold = 2f;
+    [SerializeField]
+    GameObject Tattoo1;
+    [SerializeField]
+    GameObject Tattoo2;
 
-    bool StartLinac = false;
+    Vector3 PatientStartPosition;
+
+    public bool PatientInPosition;
+    public bool TreatmentInPosition;
+    bool PatientSideInPos;
+    bool PatientPerpInPos;
+    bool PatientParInPos;
+    public bool LaserPositionCorrect = false;
+    bool TreatmentPatientXPos;
+    bool TreatmentPatientZPos;
+    bool TreatmentPatientRot;
+    public bool PatientForTreatmentPositioned;
+
+    public delegate void PatientInPlace();
+    public static PatientInPlace PatientPositioned;
 
     // Start is called before the first frame update
     void Start()
@@ -79,6 +104,7 @@ public class LinacController : MonoBehaviour
         SensorSelect();
         FlatScanner1RotateBase = FlatScanner1.transform.parent;
         FlatScanner2RotateBase = FlatScanner2.transform.parent;
+        PatientStartPosition = Bed.transform.position;
     }
 
     // Update is called once per frame
@@ -96,6 +122,15 @@ public class LinacController : MonoBehaviour
         {
             AparatusMovementRight();
         }
+        if (!LaserPositionCorrect)
+        {
+            LaserValidation();
+        }
+        else
+        {
+            TreatmentValidation();
+        }
+        PatientTreatmentPosition();
     }
     #region Bed Movement
     public void BaseLiftUp()
@@ -143,7 +178,7 @@ public class LinacController : MonoBehaviour
         if (Bed.transform.localPosition.y <= 1130f)
         {
             ForwardBackNumber += .025f;
-            ForwardBackText.text = "Bed movement = " +  ForwardBackNumber.ToString("0.00") + " CM";
+            ForwardBackText.text = "Bed movement = " + ForwardBackNumber.ToString("0.00") + " CM";
             Bed.transform.localPosition = new Vector3(Bed.transform.localPosition.x, Bed.transform.localPosition.y + .35f, Bed.transform.localPosition.z);
             AudioToggleON();
         }
@@ -162,7 +197,7 @@ public class LinacController : MonoBehaviour
     public void RotateBedRight()
     {
         Debug.Log(BedSvivle.transform.localRotation.y);
-        if(BedSvivle.transform.localRotation.y >= -.15f)
+        if (BedSvivle.transform.localRotation.y >= -.15f)
         {
             BedSvivle.transform.Rotate(eulers: -Vector3.up * .05f, Space.Self);
         }
@@ -293,22 +328,22 @@ public class LinacController : MonoBehaviour
     }
     public void OpeningSelectedScanner()
     {
-        if(SelectedScanner == FlatScanner1)
+        if (SelectedScanner == FlatScanner1)
         {
             OpenScanner1();
         }
-        if(SelectedScanner == FlatScanner2)
+        if (SelectedScanner == FlatScanner2)
         {
             OpenScanner2();
         }
     }
     public void ClosingSelectedScanner()
     {
-        if(SelectedScanner == FlatScanner1)
+        if (SelectedScanner == FlatScanner1)
         {
             CloseScanner1();
         }
-        if(SelectedScanner == FlatScanner2)
+        if (SelectedScanner == FlatScanner2)
         {
             CloseScanner2();
         }
@@ -346,7 +381,100 @@ public class LinacController : MonoBehaviour
         }
     }
     #endregion
+    #region Validation
 
+    void LaserValidation()
+    {
+        if (SideLaser.transform.position.y - PositionTreshold < Tattoo1.transform.position.y && SideLaser.transform.position.y + PositionTreshold > Tattoo1.transform.position.y)
+        {
+            PatientSideInPos = true;
+        }
+        else
+        {
+            PatientSideInPos = false;
+        }
+        if (PerpedicualrLaser.transform.position.x - PositionTreshold < Tattoo2.transform.position.x && PerpedicualrLaser.transform.position.x + PositionTreshold > Tattoo2.transform.position.x)
+        {
+            PatientPerpInPos = true;
+        }
+        else
+        {
+            PatientPerpInPos = false;
+        }
+        if (TopLaser.transform.position.z - PositionTreshold < Tattoo2.transform.position.z && TopLaser.transform.position.z + PositionTreshold > Tattoo2.transform.position.z)
+        {
+            PatientParInPos = true;
+        }
+        else
+        {
+            PatientParInPos = false;
+        }
+        if(PatientParInPos && PatientPerpInPos && PatientSideInPos)
+        {
+            if (!PatientInPosition)
+            {
+                PatientInPosition = true;
+                LaserPositionCorrect = true;
+                PatientPositioned?.Invoke();
+            }
+        }
+        else
+        {
+            if (PatientInPosition)
+            {
+                PatientInPosition = false;
+                PatientPositioned?.Invoke();
+            }
+        }
+
+    }
+
+    void TreatmentValidation()
+    {
+        if(TaskController.instance.SelectedTask != null)
+        {
+            Debug.Log(LinacAparatusMovement.transform.rotation.eulerAngles.x);
+            if (LinacAparatusMovement.transform.rotation.eulerAngles.x > TaskController.instance.SelectedTask.TreatmentRotation -TreatmentRotThreshold && LinacAparatusMovement.transform.rotation.eulerAngles.x < TaskController.instance.SelectedTask.TreatmentRotation + TreatmentRotThreshold)
+            {
+                TreatmentInPosition = true;
+            }
+            else
+            {
+                TreatmentInPosition = false;
+            }
+        }
+    }
+    void PatientTreatmentPosition()
+    {
+
+        if(BedSvivle.transform.rotation.eulerAngles.y -180f > TaskController.instance.SelectedTask.PatientRotation - TreatmentRotThreshold && BedSvivle.transform.rotation.eulerAngles.y - 180f < TaskController.instance.SelectedTask.PatientRotation + TreatmentRotThreshold )
+        {
+            TreatmentPatientRot = true;
+            Debug.Log("Bed rotation good");
+        }
+        else
+        {
+            TreatmentPatientRot = false;
+            Debug.Log("Bed rotation bad");
+        }
+        if(Bed.transform.position.x > PatientStartPosition.x + TaskController.instance.SelectedTask.PatientX - PositionTreshold && Bed.transform.position.x < PatientStartPosition.x + TaskController.instance.SelectedTask.PatientX + PositionTreshold)
+        {
+            Debug.Log("PatientInXGood");
+        }
+        else
+        {
+            Debug.Log("PatienInXBad");
+        }
+        if (Bed.transform.position.z > PatientStartPosition.z + TaskController.instance.SelectedTask.PatientZ - PositionTreshold && Bed.transform.position.z < PatientStartPosition.z + TaskController.instance.SelectedTask.PatientZ + PositionTreshold)
+        {
+            Debug.Log("PatientInZGood");
+        }
+        else
+        {
+            Debug.Log("PatienInZBad");
+        }
+    }
+    #endregion
     public void ToggleControls()
     {
         if (SensorControls.activeInHierarchy)
@@ -359,5 +487,14 @@ public class LinacController : MonoBehaviour
             BedControls.SetActive(false);
             SensorControls.SetActive(true);
         }
+    }
+    public void DisableSensorControls()
+    {
+        if (SensorControls.activeInHierarchy)
+        {
+            SensorControls.SetActive(false);
+            BedControls.SetActive(true);
+        }
+        ToggleControlsBtn.interactable = false;
     }
 }
